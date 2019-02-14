@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/dghubble/sling"
-	"gopkg.in/go-playground/validator.v9"
 )
 
 type ProjectGroupService struct {
@@ -29,20 +28,8 @@ type ProjectGroup struct {
 	LastModifiedBy    string   `json:"LastModifiedBy,omitempty"`
 	LastModifiedOn    string   `json:"LastModifiedOn,omitempty"`
 	Links             Links    `json:"Links,omitempty"`
-	Name              string   `json:"Name,omitempty" validate:"required"`
+	Name              string   `json:"Name,omitempty"`
 	RetentionPolicyID string   `json:"RetentionPolicyId,omitempty"`
-}
-
-func (p *ProjectGroup) Validate() error {
-	validate := validator.New()
-
-	err := validate.Struct(p)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func NewProjectGroup(name string) *ProjectGroup {

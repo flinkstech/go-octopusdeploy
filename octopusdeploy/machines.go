@@ -76,26 +76,6 @@ func NewMachine(Name string, Disabled bool, EnvironmentIDs []string, Roles []str
 	}
 }
 
-// ValidateMachineValues checks the values of a Machine object to see if they are suitable for
-// sending to Octopus Deploy. Used when adding or updating machines.
-func ValidateMachineValues(Machine *Machine) error {
-	if Machine.Endpoint != nil {
-		matchingPropertiesErr := ValidateMultipleProperties([]error{
-			ValidatePropertiesMatch(Machine.Endpoint.Thumbprint, "Machine.Endpoint.Thumbprint", Machine.Thumbprint, "Machine.Thumbprint"),
-			ValidatePropertiesMatch(Machine.Endpoint.URI, "Machine.Endpoint.URI", Machine.URI, "Machine.URI"),
-		})
-
-		if matchingPropertiesErr != nil {
-			return matchingPropertiesErr
-		}
-	}
-
-	return ValidateMultipleProperties([]error{
-		ValidatePropertyValues("Machine.Status", Machine.Status, ValidMachineStatuses),
-		ValidatePropertyValues("Machine.TenantedDeploymentParticipation", Machine.TenantedDeploymentParticipation, ValidTenantedDeploymentModes),
-	})
-}
-
 // Get returns a single machine with a given MachineID
 func (s *MachineService) Get(MachineID string) (*Machine, error) {
 	path := fmt.Sprintf("machines/%s", MachineID)
@@ -132,11 +112,6 @@ func (s *MachineService) GetAll() (*[]Machine, error) {
 
 // Add creates a new machine in Octopus Deploy
 func (s *MachineService) Add(machine *Machine) (*Machine, error) {
-	err := ValidateMachineValues(machine)
-	if err != nil {
-		return nil, err
-	}
-
 	resp, err := apiAdd(s.sling, machine, new(Machine), "machines")
 	if err != nil {
 		return nil, err
@@ -159,10 +134,6 @@ func (s *MachineService) Delete(MachineID string) error {
 
 // Delete updates an existing machine in Octopus Deploy
 func (s *MachineService) Update(machine *Machine) (*Machine, error) {
-	err := ValidateMachineValues(machine)
-	if err != nil {
-		return nil, err
-	}
 
 	path := fmt.Sprintf("machines/%s", machine.ID)
 	resp, err := apiUpdate(s.sling, machine, new(Machine), path)

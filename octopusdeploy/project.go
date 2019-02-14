@@ -60,18 +60,6 @@ func NewProject(name, lifeCycleID, projectGroupID string) *Project {
 	}
 }
 
-// ValidateProjectValues checks the values of a Project object to see if they are suitable for
-// sending to Octopus Deploy. Used when adding or updating projects.
-func ValidateProjectValues(Project *Project) error {
-	return ValidateMultipleProperties([]error{
-		ValidatePropertyValues("SkipMachineBehavior", Project.ProjectConnectivityPolicy.SkipMachineBehavior, ValidProjectConnectivityPolicySkipMachineBehaviors),
-		ValidatePropertyValues("DefaultGuidedFailureMode", Project.DefaultGuidedFailureMode, ValidProjectDefaultGuidedFailureModes),
-		ValidateRequiredPropertyValue("LifecycleID", Project.LifecycleID),
-		ValidateRequiredPropertyValue("Name", Project.Name),
-		ValidateRequiredPropertyValue("ProjectGroupID", Project.ProjectGroupID),
-	})
-}
-
 // Get returns a single project by its projectid in Octopus Deploy
 func (s *ProjectService) Get(projectid string) (*Project, error) {
 	path := fmt.Sprintf("projects/%s", projectid)
@@ -131,11 +119,6 @@ func (s *ProjectService) GetByName(projectName string) (*Project, error) {
 
 // Add adds an new project in Octopus Deploy
 func (s *ProjectService) Add(project *Project) (*Project, error) {
-	err := ValidateProjectValues(project)
-	if err != nil {
-		return nil, err
-	}
-
 	resp, err := apiAdd(s.sling, project, new(Project), "projects")
 
 	if err != nil {
@@ -159,11 +142,6 @@ func (s *ProjectService) Delete(projectid string) error {
 
 // Update updates an existing project in Octopus Deploy
 func (s *ProjectService) Update(project *Project) (*Project, error) {
-	err := ValidateProjectValues(project)
-	if err != nil {
-		return nil, err
-	}
-
 	path := fmt.Sprintf("projects/%s", project.ID)
 	resp, err := apiUpdate(s.sling, project, new(Project), path)
 

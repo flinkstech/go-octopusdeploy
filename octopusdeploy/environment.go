@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/dghubble/sling"
-	"gopkg.in/go-playground/validator.v9"
 )
 
 type EnvironmentService struct {
@@ -28,18 +27,6 @@ type Environment struct {
 	Description      string `json:"Description"`
 	SortOrder        int    `json:"SortOrder"`
 	UseGuidedFailure bool   `json:"UseGuidedFailure"`
-}
-
-func (t *Environment) Validate() error {
-	validate := validator.New()
-
-	err := validate.Struct(t)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func NewEnvironment(name, description string, useguidedfailure bool) *Environment {

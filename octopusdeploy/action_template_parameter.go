@@ -1,9 +1,14 @@
 package octopusdeploy
 
+import (
+	"encoding/json"
+	"errors"
+)
+
 type ActionTemplateParameter struct {
 
 	// default value
-	DefaultValue map[string]PropertyValue `json:"DefaultValue,omitempty"`
+	DefaultValue PropertyValue `json:"DefaultValue,omitempty"`
 
 	// display settings
 	DisplaySettings map[string]string `json:"DisplaySettings,omitempty"`
@@ -29,4 +34,27 @@ type ActionTemplateParameter struct {
 
 	// name
 	Name string `json:"Name,omitempty"`
+}
+
+func (propertyValue *PropertyValue) UnmarshalJSON(b []byte) error {
+	if err := json.Unmarshal(b, &propertyValue.SensitiveValue); err == nil {
+		propertyValue.IsSensitive = true
+		return nil
+	}
+	if err := json.Unmarshal(b, &propertyValue.Value); err == nil {
+		propertyValue.IsSensitive = false
+		return nil
+	}
+	return errors.New("failed to unmarshal PropertyValue")
+}
+
+type PropertyValue struct {
+	IsSensitive    bool           `json:"IsSensitive,omitempty"`
+	Value          string         `json:"Value,omitempty"`
+	SensitiveValue SensitiveValue `json:"SensitiveValue,omitempty"`
+}
+
+type SensitiveValue struct {
+	HasValue bool   `json:"HasValue,omitempty"`
+	NewValue string `json:"NewValue,omitempty"`
 }

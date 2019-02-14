@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/dghubble/sling"
-	"gopkg.in/go-playground/validator.v9"
 )
 
 type DeploymentProcessService struct {
@@ -36,10 +35,10 @@ type DeploymentProcess struct {
 type DeploymentStep struct {
 	ID                 string                           `json:"Id,omitempty"`
 	Name               string                           `json:"Name"`
-	PackageRequirement DeploymentStepPackageRequirement `json:"PackageRequirement,omitempty"`                                         // may need its own model / enum
-	Properties         map[string]string                `json:"Properties"`                                                           // TODO: refactor to use the PropertyValueResource for handling sensitive values - https://blog.gopheracademy.com/advent-2016/advanced-encoding-decoding/
-	Condition          DeploymentStepCondition          `json:"Condition,omitempty" validate:"oneof=Success Failure Always Variable"` // variable option adds a Property "Octopus.Action.ConditionVariableExpression"
-	StartTrigger       DeploymentStepStartTrigger       `json:"StartTrigger,omitempty" validate:"oneof=StartAfterPrevious StartWithPrevious"`
+	PackageRequirement DeploymentStepPackageRequirement `json:"PackageRequirement,omitempty"` // may need its own model / enum
+	Properties         map[string]string                `json:"Properties"`                   // TODO: refactor to use the PropertyValueResource for handling sensitive values - https://blog.gopheracademy.com/advent-2016/advanced-encoding-decoding/
+	Condition          DeploymentStepCondition          `json:"Condition,omitempty"`          // variable option adds a Property "Octopus.Action.ConditionVariableExpression"
+	StartTrigger       DeploymentStepStartTrigger       `json:"StartTrigger,omitempty"`
 	Actions            []DeploymentAction               `json:"Actions,omitempty"`
 }
 
@@ -59,21 +58,20 @@ type DeploymentAction struct {
 	Packages                      []PackageReference `json:"Packages,omitempty"`
 }
 
-
 type DeploymentStepPackageRequirement string
 
 const (
-	DeploymentStepPackageRequirement_LetOctopusDecide = DeploymentStepPackageRequirement("LetOctopusDecide")
+	DeploymentStepPackageRequirement_LetOctopusDecide         = DeploymentStepPackageRequirement("LetOctopusDecide")
 	DeploymentStepPackageRequirement_BeforePackageAcquisition = DeploymentStepPackageRequirement("BeforePackageAcquisition")
-	DeploymentStepPackageRequirement_AfterPackageAcquisition = DeploymentStepPackageRequirement("AfterPackageAcquisition")
+	DeploymentStepPackageRequirement_AfterPackageAcquisition  = DeploymentStepPackageRequirement("AfterPackageAcquisition")
 )
 
 type DeploymentStepCondition string
 
 const (
-	DeploymentStepCondition_Success = DeploymentStepCondition("Success")
-	DeploymentStepCondition_Failure = DeploymentStepCondition("Failure")
-	DeploymentStepCondition_Always = DeploymentStepCondition("Always")
+	DeploymentStepCondition_Success  = DeploymentStepCondition("Success")
+	DeploymentStepCondition_Failure  = DeploymentStepCondition("Failure")
+	DeploymentStepCondition_Always   = DeploymentStepCondition("Always")
 	DeploymentStepCondition_Variable = DeploymentStepCondition("Variable")
 )
 
@@ -81,7 +79,7 @@ type DeploymentStepStartTrigger string
 
 const (
 	DeploymentStepStartTrigger_StartAfterPrevious = DeploymentStepStartTrigger("StartAfterPrevious")
-	DeploymentStepStartTrigger_StartWithPrevious = DeploymentStepStartTrigger("StartWithPrevious")
+	DeploymentStepStartTrigger_StartWithPrevious  = DeploymentStepStartTrigger("StartWithPrevious")
 )
 
 type PackageReference struct {
@@ -94,23 +92,10 @@ type PackageReference struct {
 }
 
 const (
-	PackageAcquisitionLocation_Server = "Server"
+	PackageAcquisitionLocation_Server          = "Server"
 	PackageAcquisitionLocation_ExecutionTarget = "ExecutionTarget"
-	PackageAcquisitionLocation_NotAcquired = "NotAcquired"
+	PackageAcquisitionLocation_NotAcquired     = "NotAcquired"
 )
-
-
-func (d *DeploymentProcess) Validate() error {
-	validate := validator.New()
-
-	err := validate.Struct(d)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
 
 func (s *DeploymentProcessService) Get(deploymentProcessID string) (*DeploymentProcess, error) {
 	path := fmt.Sprintf("deploymentprocesses/%s", deploymentProcessID)

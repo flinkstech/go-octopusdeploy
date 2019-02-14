@@ -2,7 +2,7 @@ package octopusdeploy
 
 import (
 	"fmt"
-	"gopkg.in/go-playground/validator.v9"
+
 	"net/url"
 
 	"github.com/dghubble/sling"
@@ -25,7 +25,7 @@ type Lifecycles struct {
 
 type Lifecycle struct {
 	ID                      string          `json:"Id,omitempty"`
-	Name                    string          `json:"Name" validate:"required"`
+	Name                    string          `json:"Name"`
 	Description             string          `json:"Description,omitempty"`
 	ReleaseRetentionPolicy  RetentionPeriod `json:"ReleaseRetentionPolicy,omitempty"`
 	TentacleRetentionPolicy RetentionPeriod `json:"TentacleRetentionPolicy,omitempty"`
@@ -35,7 +35,7 @@ type Lifecycle struct {
 type RetentionUnit string
 
 const (
-	RetentionUnit_Days = RetentionUnit("Days")
+	RetentionUnit_Days  = RetentionUnit("Days")
 	RetentionUnit_Items = RetentionUnit("Items")
 )
 
@@ -46,52 +46,27 @@ type RetentionPeriod struct {
 }
 
 type Phase struct {
-	ID                                 string          `json:"Id,omitempty"`
-	Name                               string          `json:"Name" validate:"required"`
-	MinimumEnvironmentsBeforePromotion int32           `json:"MinimumEnvironmentsBeforePromotion"`
-	IsOptionalPhase                    bool            `json:"IsOptionalPhase"`
+	ID                                 string           `json:"Id,omitempty"`
+	Name                               string           `json:"Name"`
+	MinimumEnvironmentsBeforePromotion int32            `json:"MinimumEnvironmentsBeforePromotion"`
+	IsOptionalPhase                    bool             `json:"IsOptionalPhase"`
 	ReleaseRetentionPolicy             *RetentionPeriod `json:"ReleaseRetentionPolicy"`
 	TentacleRetentionPolicy            *RetentionPeriod `json:"TentacleRetentionPolicy"`
-	AutomaticDeploymentTargets         []string        `json:"AutomaticDeploymentTargets"`
-	OptionalDeploymentTargets          []string        `json:"OptionalDeploymentTargets"`
+	AutomaticDeploymentTargets         []string         `json:"AutomaticDeploymentTargets"`
+	OptionalDeploymentTargets          []string         `json:"OptionalDeploymentTargets"`
 }
-
 
 func NewLifecycle(name string) *Lifecycle {
 	return &Lifecycle{
 		Name:   name,
 		Phases: []Phase{},
-		TentacleRetentionPolicy:RetentionPeriod{
-			Unit:RetentionUnit_Days,
+		TentacleRetentionPolicy: RetentionPeriod{
+			Unit: RetentionUnit_Days,
 		},
-		ReleaseRetentionPolicy:RetentionPeriod{
-			Unit:RetentionUnit_Days,
+		ReleaseRetentionPolicy: RetentionPeriod{
+			Unit: RetentionUnit_Days,
 		},
 	}
-}
-
-// ValidateLifecycleValues checks the values of a Lifecycle object to see if they are suitable for
-// sending to Octopus Deploy. Used when adding or updating lifecycles.
-func ValidateLifecycleValues(Lifecycle *Lifecycle) error {
-	validate := validator.New()
-
-	err := validate.Struct(Lifecycle)
-
-	if err != nil {
-		return err
-	}
-
-	if Lifecycle.Phases != nil {
-		for _, phase := range Lifecycle.Phases {
-			phaseErr := validate.Struct(phase)
-
-			if phaseErr != nil {
-				return phaseErr
-			}
-		}
-	}
-
-	return nil
 }
 
 // Get returns a single lifecycle by its lifecycleid in Octopus Deploy
@@ -108,7 +83,7 @@ func (s *LifecycleService) Get(LifecycleID string) (*Lifecycle, error) {
 
 // GetAll returns all lifecycles in Octopus Deploy
 func (s *LifecycleService) GetAll() (*[]Lifecycle, error) {
-	return s.get("");
+	return s.get("")
 }
 
 func (s *LifecycleService) get(query string) (*[]Lifecycle, error) {
@@ -160,11 +135,6 @@ func (s *LifecycleService) GetByName(lifecycleName string) (*Lifecycle, error) {
 
 // Add adds an new lifecycle in Octopus Deploy
 func (s *LifecycleService) Add(lifecycle *Lifecycle) (*Lifecycle, error) {
-	err := ValidateLifecycleValues(lifecycle)
-	if err != nil {
-		return nil, err
-	}
-
 	resp, err := apiAdd(s.sling, lifecycle, new(Lifecycle), "lifecycles")
 
 	if err != nil {
@@ -188,11 +158,6 @@ func (s *LifecycleService) Delete(lifecycleid string) error {
 
 // Update updates an existing lifecycle in Octopus Deploy
 func (s *LifecycleService) Update(lifecycle *Lifecycle) (*Lifecycle, error) {
-	err := ValidateLifecycleValues(lifecycle)
-	if err != nil {
-		return nil, err
-	}
-
 	path := fmt.Sprintf("lifecycles/%s", lifecycle.ID)
 	resp, err := apiUpdate(s.sling, lifecycle, new(Lifecycle), path)
 

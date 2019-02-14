@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/dghubble/sling"
-	"gopkg.in/go-playground/validator.v9"
 )
 
 type VariableService struct {
@@ -70,18 +69,6 @@ type ScopeValues struct {
 type ScopeValue struct {
 	ID   string `json:"Id"`
 	Name string `json:"Name"`
-}
-
-func (t *Variable) Validate() error {
-	validate := validator.New()
-
-	err := validate.Struct(t)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func NewVariable(name, valuetype, value, description string, scope *VariableScope, sensitive bool) *Variable {
