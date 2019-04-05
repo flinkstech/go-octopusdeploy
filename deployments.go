@@ -26,7 +26,7 @@ type DeploymentItem struct {
 	FormValues               map[string]string `json:"FormValues"`
 	QueueTime                time.Time         `json:"QueueTime"`
 	QueueTimeExpiry          time.Time         `json:"QueueTimeExpiry"`
-	Name                     string            `json:"Comments"`
+	Name                     string            `json:"Name"`
 	LastModifiedOn           time.Time         `json:"LastModifiedOn,omitempty"`
 	LastModifiedBy           time.Time         `json:"LastModifiedBy,omitempty"`
 	Links                    map[string]string `json:"Links,omitempty"`
@@ -56,7 +56,7 @@ func NewDeploymentService(sling *sling.Sling) *DeploymentService {
 	}
 }
 
-func (s *DeploymentService) Get(tenantID string) (*Deployments, error) {
+func (s *DeploymentService) All() (*Deployments, error) {
 	path := "deployments"
 	resp, err := apiGet(s.sling, new(Deployments), path)
 
