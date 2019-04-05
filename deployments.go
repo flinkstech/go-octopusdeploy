@@ -1,6 +1,8 @@
 package octopusdeploy
 
 import (
+	"errors"
+	"strings"
 	"time"
 
 	"github.com/dghubble/sling"
@@ -65,4 +67,32 @@ func (s *DeploymentService) All() (*Deployments, error) {
 	}
 
 	return resp.(*Deployments), nil
+}
+
+func (s *DeploymentService) FindLatestForTenant(tenantID string, terminateAt ...int) (*DeploymentItem, error) {
+	path := "deployments"
+
+	for {
+		resp, err := apiGet(s.sling, new(Deployments), path)
+		if err != nil {
+			return nil, err
+		}
+
+		deployments := resp.(*Deployments)
+
+		for _, deployment := range deployments.Items {
+			if deployment.TenantID == tenantID {
+				return &deployment, nil
+			}
+		}
+
+		var ok bool
+		path, ok = deployments.Links["Page.Next"]
+		if !ok {
+			break
+		}
+		path = strings.Replace(path, "/api", "", 1)
+	}
+
+	return nil, errors.New("not found")
 }
