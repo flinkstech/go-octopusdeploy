@@ -43,7 +43,7 @@ func NewTenantVariableService(sling *sling.Sling) *TenantVariableService {
 	}
 }
 
-func (s *TenantVariableService) Get(tenantID string) (*TenantVariables, error) {
+func (s *TenantVariableService) GetTenant(tenantID string) (*TenantVariables, error) {
 	path := fmt.Sprintf("tenants/%s/variables", tenantID)
 	resp, err := apiGet(s.sling, new(TenantVariables), path)
 

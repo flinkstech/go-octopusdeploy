@@ -91,7 +91,7 @@ func (s *DeploymentService) FindLatestForTenant(tenantID string, terminateAt ...
 		if !ok {
 			break
 		}
-		path = strings.Replace(path, "/api", "", 1)
+		path = strings.Replace(path, "/api/", "", 1)
 	}
 
 	return nil, errors.New("not found")
